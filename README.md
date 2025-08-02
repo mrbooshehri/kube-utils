@@ -1,14 +1,18 @@
 # kube-utils
 
-**kube-utils** is a collection of CLI tools and scripts designed to streamline working with Kubernetes. It simplifies tasks like exporting, transforming, and managing resources—making it easier to build, maintain, and automate Kubernetes workflows across environments.
+**kube-utils** is a collection of CLI tools and scripts designed to streamline working with Kubernetes. It simplifies tasks like exporting, transforming, applying, and managing resources—making it easier to build, maintain, and automate Kubernetes workflows across environments.
 
 ## Features
 
 - Export Kubernetes resources as clean YAML files with unnecessary metadata removed
 - Batch update namespaces and labels in YAML manifests for environment migration
-- Easily extendable with new scripts to facilitate Kubernetes operations
+- Apply multiple YAML files at once from any directory
+- Quickly create one or multiple Kubernetes namespaces
+- Easily extendable with new scripts to support common Kubernetes operations
 
 ## Included Scripts
+
+---
 
 ### 1. `k8sgetter.sh`
 
@@ -31,6 +35,8 @@ Example:
 ./k8sgetter.sh -n kube-system -r svc kube-dns
 ```
 
+---
+
 ### 2. `k8snshelper.sh`
 
 Batch update the namespace and component labels in exported YAML files to adapt them to new environments.
@@ -41,21 +47,59 @@ Batch update the namespace and component labels in exported YAML files to adapt 
 ./k8snshelper.sh -s <source-base-dir> -n <new-namespace>
 ```
 
-* `<source-base-dir>`: The directory containing your exported YAML files (e.g., `exports/default/deployment`)
-* `<new-namespace>`: The target namespace and component label to set in all YAML files
-
 Example:
 
 ```bash
 ./k8snshelper.sh -s exports/default/deployment -n staging
 ```
 
-This command will create a new directory `exports/default/deployment_converted` with updated namespace and labels.
+Creates a new directory `exports/default/deployment_converted` with updated files.
+
+---
+
+### 3. `k8snscreate.sh`
+
+Create one or more Kubernetes namespaces in a single command.
+
+#### How to use
+
+```bash
+./k8snscreate.sh <namespace1> [namespace2 ... namespaceN]
+```
+
+Example:
+
+```bash
+./k8snscreate.sh dev staging prod
+```
+
+---
+
+### 4. `k8sapply.sh`
+
+Recursively apply all valid `.yaml` files in a directory (excluding `kube-root-ca.crt.yaml`).
+
+#### How to use
+
+```bash
+./k8sapply.sh [-d <base-directory>]
+```
+
+* If `-d` is not provided, the current directory is used.
+* Skips invalid files and continues applying the rest.
+
+Example:
+
+```bash
+./k8sapply.sh -d exports/staging
+```
+
+---
 
 ## Requirements
 
 * [kubectl](https://kubernetes.io/docs/tasks/tools/)
-* [yq (mikefarah)](https://github.com/mikefarah/yq) — YAML processor CLI
+* [yq (mikefarah)](https://github.com/mikefarah/yq) — required by `k8sgetter.sh` and `k8snshelper.sh`
 
 ## Installation
 
@@ -67,7 +111,7 @@ cd kube-utils
 chmod +x *.sh
 ```
 
-Make sure `kubectl` and `yq` are installed and accessible in your `PATH`.
+Ensure `kubectl` and `yq` are installed and accessible via `PATH`.
 
 ## Contributing
 
